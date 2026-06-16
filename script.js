@@ -325,15 +325,16 @@ const defaultLinks = [
     { name: "NRK TV", url: "https://tv.nrk.no", iconClass: "fa-solid fa-tower-broadcast" },
     { name: "Yr.no (Vær)", url: "https://www.yr.no", iconClass: "fa-solid fa-cloud-sun" },
     { name: "VG", url: "https://www.vg.no", iconClass: "fa-solid fa-newspaper" },
-    { name: "ChatGPT", url: "https://chatgpt.com", iconClass: "fa-solid fa-robot" }
+    { name: "ChatGPT", url: "https://chatgpt.com", iconClass: "fa-solid fa-robot" },
+    { name: "Gemini", url: "https://gemini.google.com", iconClass: "fa-solid fa-wand-magic-sparkles" }
 ];
 
-let bookmarks = JSON.parse(localStorage.getItem('twilligent_links_v2'));
+let bookmarks = JSON.parse(localStorage.getItem('twilligent_links_v3'));
 
 // Smart migration check: if user has old defaults or no links, load the new defaults
 if (!bookmarks || (bookmarks.length === 4 && bookmarks[0].name === "Google" && bookmarks[3].name === "Wikipedia")) {
     bookmarks = defaultLinks;
-    localStorage.setItem('twilligent_links_v2', JSON.stringify(bookmarks));
+    localStorage.setItem('twilligent_links_v3', JSON.stringify(bookmarks));
 }
 
 const linksGrid = document.getElementById('links-grid');
@@ -376,6 +377,7 @@ function renderBookmarks() {
             else if (lowUrl.includes("yr.no")) iconClass = "fa-solid fa-cloud-sun";
             else if (lowUrl.includes("vg.no")) iconClass = "fa-solid fa-newspaper";
             else if (lowUrl.includes("chatgpt")) iconClass = "fa-solid fa-robot";
+            else if (lowUrl.includes("gemini")) iconClass = "fa-solid fa-wand-magic-sparkles";
         }
         
         linkElem.innerHTML = `
@@ -400,7 +402,7 @@ function renderBookmarks() {
 
 function deleteBookmark(index) {
     bookmarks.splice(index, 1);
-    localStorage.setItem('twilligent_links_v2', JSON.stringify(bookmarks));
+    localStorage.setItem('twilligent_links_v3', JSON.stringify(bookmarks));
     renderBookmarks();
 }
 
@@ -437,7 +439,7 @@ saveLinkBtn.addEventListener('click', () => {
     }
 
     bookmarks.push({ name, url });
-    localStorage.setItem('twilligent_links_v2', JSON.stringify(bookmarks));
+    localStorage.setItem('twilligent_links_v3', JSON.stringify(bookmarks));
     
     renderBookmarks();
     addLinkForm.classList.remove('show');
