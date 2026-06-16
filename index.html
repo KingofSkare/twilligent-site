@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twilligent | Under Utvikling</title>
+    <!-- Google Fonts: Outfit for headings, Inter for body -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for beautiful icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Interactive Particle Canvas Background -->
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <i class="fa-solid fa-circle-nodes logo-icon"></i>
+                <span class="logo-text">twilligent<span class="dot">.</span>com</span>
+            </div>
+            <div class="header-actions">
+                <button id="lang-toggle" class="btn btn-secondary">
+                    <i class="fa-solid fa-globe"></i> <span id="lang-text">English</span>
+                </button>
+                <button id="theme-menu-btn" class="btn btn-secondary" title="Endre fargetema">
+                    <i class="fa-solid fa-palette"></i>
+                </button>
+                <div class="theme-menu" id="theme-menu">
+                    <button class="theme-opt active" data-theme="twilight">Twilight Deep</button>
+                    <button class="theme-opt" data-theme="emerald">Emerald Intel</button>
+                    <button class="theme-opt" data-theme="cyberpunk">Cyber Neon</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <main class="grid-layout">
+            <!-- Hero / Coming Soon Card -->
+            <section class="card hero-card">
+                <div class="badge-container">
+                    <span class="status-badge" id="status-badge">
+                        <span class="pulse-dot"></span> Midlertidig nettside
+                    </span>
+                </div>
+                <h1 id="hero-title">Intelligente tråder, uendelige muligheter</h1>
+                <p id="hero-desc" class="lead-text">
+                    Dette domenet er registrert og klargjort. Mens planene veves sammen, kan du bruke denne siden som ditt personlige startpanel.
+                </p>
+                <div class="divider"></div>
+                <div class="domain-specs">
+                    <div class="spec-item">
+                        <i class="fa-solid fa-signature"></i>
+                        <div>
+                            <span class="spec-label">Domenenavn</span>
+                            <span class="spec-value">twilligent.com</span>
+                        </div>
+                    </div>
+                    <div class="spec-item">
+                        <i class="fa-solid fa-server"></i>
+                        <div>
+                            <span class="spec-label">Status</span>
+                            <span class="spec-value" id="spec-status-val">Parkert & Aktiv</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dashboard / Welcome Widget -->
+            <section class="card time-card">
+                <div class="greeting-container">
+                    <h2 id="greeting-txt">God kveld!</h2>
+                    <p id="date-txt">Tirsdag, 16. juni 2026</p>
+                </div>
+                <div class="clock-display" id="clock-display">20:56:00</div>
+                <div class="search-bar-container">
+                    <form action="https://www.google.com/search" method="get" target="_blank" class="search-form">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" name="q" placeholder="Søk på nettet med Google..." id="search-input">
+                        <button type="submit" class="search-btn"><i class="fa-solid fa-arrow-right"></i></button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Quick Links / Bookmarks Widget -->
+            <section class="card links-card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-star header-icon"></i> <span id="bookmarks-title">Hurtiglenker</span></h3>
+                    <button id="add-link-btn" class="btn btn-icon" title="Legg til ny lenke">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+                
+                <div class="links-grid" id="links-grid">
+                    <!-- Default links loaded dynamically or saved in localStorage -->
+                </div>
+
+                <!-- Add Link Modal Form (Hidden by default inside card) -->
+                <div class="add-link-form" id="add-link-form">
+                    <h4>Legg til lenke</h4>
+                    <div class="form-group">
+                        <input type="text" id="new-link-name" placeholder="Navn (f.eks. GitHub)">
+                    </div>
+                    <div class="form-group">
+                        <input type="url" id="new-link-url" placeholder="URL (https://...)">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="cancel-link-btn" class="btn btn-secondary btn-sm">Avbryt</button>
+                        <button type="button" id="save-link-btn" class="btn btn-primary btn-sm">Lagre</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sticky Notes Widget -->
+            <section class="card notes-card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-note-sticky header-icon"></i> <span id="notes-title">Huskeblokk</span></h3>
+                    <span class="save-status" id="save-status"><i class="fa-solid fa-check"></i> Lagret</span>
+                </div>
+                <textarea id="notes-textarea" placeholder="Skriv ned dine ideer eller gjøremål her... De lagres automatisk på maskinen din."></textarea>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 twilligent.com. <span id="footer-text">Laget spesielt for deg.</span></p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
