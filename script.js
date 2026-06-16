@@ -315,13 +315,26 @@ themeOptions.forEach(opt => {
    QUICK LINKS / BOOKMARKS MANAGER
    ========================================================================== */
 const defaultLinks = [
-    { name: "Google", url: "https://google.com", iconClass: "fa-brands fa-google" },
     { name: "GitHub", url: "https://github.com", iconClass: "fa-brands fa-github" },
     { name: "YouTube", url: "https://youtube.com", iconClass: "fa-brands fa-youtube" },
-    { name: "Wikipedia", url: "https://wikipedia.org", iconClass: "fa-solid fa-book" }
+    { name: "Gmail", url: "https://mail.google.com", iconClass: "fa-solid fa-envelope" },
+    { name: "Viaplay", url: "https://viaplay.no", iconClass: "fa-solid fa-circle-play" },
+    { name: "TV2 Play", url: "https://play.tv2.no", iconClass: "fa-solid fa-tv" },
+    { name: "Disney+", url: "https://www.disneyplus.com", iconClass: "fa-solid fa-wand-magic-sparkles" },
+    { name: "Max (HBO)", url: "https://www.max.com", iconClass: "fa-solid fa-clapperboard" },
+    { name: "NRK TV", url: "https://tv.nrk.no", iconClass: "fa-solid fa-tower-broadcast" },
+    { name: "Yr.no (Vær)", url: "https://www.yr.no", iconClass: "fa-solid fa-cloud-sun" },
+    { name: "VG", url: "https://www.vg.no", iconClass: "fa-solid fa-newspaper" },
+    { name: "ChatGPT", url: "https://chatgpt.com", iconClass: "fa-solid fa-robot" }
 ];
 
-let bookmarks = JSON.parse(localStorage.getItem('twilligent_links')) || defaultLinks;
+let bookmarks = JSON.parse(localStorage.getItem('twilligent_links'));
+
+// Smart migration check: if user has old defaults or no links, load the new defaults
+if (!bookmarks || (bookmarks.length === 4 && bookmarks[0].name === "Google" && bookmarks[3].name === "Wikipedia")) {
+    bookmarks = defaultLinks;
+    localStorage.setItem('twilligent_links', JSON.stringify(bookmarks));
+}
 
 const linksGrid = document.getElementById('links-grid');
 const addLinkBtn = document.getElementById('add-link-btn');
@@ -355,6 +368,14 @@ function renderBookmarks() {
             else if (lowUrl.includes("twitter") || lowUrl.includes("x.com")) iconClass = "fa-brands fa-x-twitter";
             else if (lowUrl.includes("linkedin")) iconClass = "fa-brands fa-linkedin";
             else if (lowUrl.includes("gmail") || lowUrl.includes("mail")) iconClass = "fa-solid fa-envelope";
+            else if (lowUrl.includes("viaplay")) iconClass = "fa-solid fa-circle-play";
+            else if (lowUrl.includes("tv2")) iconClass = "fa-solid fa-tv";
+            else if (lowUrl.includes("disney")) iconClass = "fa-solid fa-wand-magic-sparkles";
+            else if (lowUrl.includes("hbo") || lowUrl.includes("max.com")) iconClass = "fa-solid fa-clapperboard";
+            else if (lowUrl.includes("nrk")) iconClass = "fa-solid fa-tower-broadcast";
+            else if (lowUrl.includes("yr.no")) iconClass = "fa-solid fa-cloud-sun";
+            else if (lowUrl.includes("vg.no")) iconClass = "fa-solid fa-newspaper";
+            else if (lowUrl.includes("chatgpt")) iconClass = "fa-solid fa-robot";
         }
         
         linkElem.innerHTML = `
