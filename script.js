@@ -328,12 +328,12 @@ const defaultLinks = [
     { name: "ChatGPT", url: "https://chatgpt.com", iconClass: "fa-solid fa-robot" }
 ];
 
-let bookmarks = JSON.parse(localStorage.getItem('twilligent_links'));
+let bookmarks = JSON.parse(localStorage.getItem('twilligent_links_v2'));
 
 // Smart migration check: if user has old defaults or no links, load the new defaults
 if (!bookmarks || (bookmarks.length === 4 && bookmarks[0].name === "Google" && bookmarks[3].name === "Wikipedia")) {
     bookmarks = defaultLinks;
-    localStorage.setItem('twilligent_links', JSON.stringify(bookmarks));
+    localStorage.setItem('twilligent_links_v2', JSON.stringify(bookmarks));
 }
 
 const linksGrid = document.getElementById('links-grid');
@@ -400,7 +400,7 @@ function renderBookmarks() {
 
 function deleteBookmark(index) {
     bookmarks.splice(index, 1);
-    localStorage.setItem('twilligent_links', JSON.stringify(bookmarks));
+    localStorage.setItem('twilligent_links_v2', JSON.stringify(bookmarks));
     renderBookmarks();
 }
 
@@ -437,7 +437,7 @@ saveLinkBtn.addEventListener('click', () => {
     }
 
     bookmarks.push({ name, url });
-    localStorage.setItem('twilligent_links', JSON.stringify(bookmarks));
+    localStorage.setItem('twilligent_links_v2', JSON.stringify(bookmarks));
     
     renderBookmarks();
     addLinkForm.classList.remove('show');
