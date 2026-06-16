@@ -176,7 +176,7 @@ const translations = {
         searchPlaceholder: "Search the web with Google...",
         bookmarksTitle: "Quick Links",
         notesTitle: "Scratchpad",
-        notesPlaceholder: "Jot down your ideas or tasks here... They are saved automatically on your machine.",
+        notesPlaceholder: "Write down your ideas or tasks here... They are saved automatically on your machine.",
         footerText: "Created especially for you.",
         greetings: {
             morning: "Good morning!",
