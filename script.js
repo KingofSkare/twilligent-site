@@ -632,7 +632,12 @@ async function callGeminiAPI(messageText) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                contents: chatHistoryContext
+                contents: chatHistoryContext,
+                tools: [
+                    {
+                        google_search: {}
+                    }
+                ]
             })
         });
 
@@ -676,7 +681,12 @@ async function callGeminiAPI(messageText) {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        contents: chatHistoryContext
+                        contents: chatHistoryContext,
+                        tools: [
+                            {
+                                google_search: {}
+                            }
+                        ]
                     })
                 });
 
