@@ -633,7 +633,16 @@ async function callGeminiAPI(messageText) {
     });
 
     if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        let errorMsg = `HTTP error! status: ${response.status}`;
+        try {
+            const errData = await response.json();
+            if (errData && errData.error && errData.error.message) {
+                errorMsg = errData.error.message;
+            }
+        } catch (e) {
+            // Response was not valid JSON
+        }
+        throw new Error(errorMsg);
     }
 
     const data = await response.json();
@@ -696,10 +705,10 @@ async function handleSendMessage() {
         console.error("Chat Error:", error);
         loadingBubble.remove();
 
-        // Add error bubble
+        // Add error bubble with details
         const errorBubble = document.createElement('div');
         errorBubble.className = "chat-bubble system-bubble";
-        errorBubble.textContent = translations[currentLang].geminiError;
+        errorBubble.textContent = `${translations[currentLang].geminiError} (${error.message})`;
         chatHistory.appendChild(errorBubble);
     } finally {
         // Enable inputs
