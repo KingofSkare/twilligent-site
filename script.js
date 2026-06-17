@@ -614,46 +614,101 @@ geminiKeyBtn.addEventListener('click', () => {
 
 // Post query to Gemini API
 async function callGeminiAPI(messageText) {
-    const model = 'gemini-3.5-flash';
-    const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${geminiApiKey}`;
+    let model = 'gemini-3.5-flash';
+    let url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${geminiApiKey}`;
     
-    chatHistoryContext.push({
-        role: "user",
-        parts: [{ text: messageText }]
-    });
-
-    const response = await fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            contents: chatHistoryContext
-        })
-    });
-
-    if (!response.ok) {
-        let errorMsg = `HTTP error! status: ${response.status}`;
-        try {
-            const errData = await response.json();
-            if (errData && errData.error && errData.error.message) {
-                errorMsg = errData.error.message;
-            }
-        } catch (e) {
-            // Response was not valid JSON
-        }
-        throw new Error(errorMsg);
+    // Push message to context if not already present (prevents duplicates on retry)
+    if (chatHistoryContext.length === 0 || chatHistoryContext[chatHistoryContext.length - 1].role !== "user") {
+        chatHistoryContext.push({
+            role: "user",
+            parts: [{ text: messageText }]
+        });
     }
 
-    const data = await response.json();
-    const responseText = data.candidates[0].content.parts[0].text;
-    
-    chatHistoryContext.push({
-        role: "model",
-        parts: [{ text: responseText }]
-    });
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                contents: chatHistoryContext
+            })
+        });
 
-    return responseText;
+        if (!response.ok) {
+            let errorMsg = `HTTP error! status: ${response.status}`;
+            try {
+                const errData = await response.json();
+                if (errData && errData.error && errData.error.message) {
+                    errorMsg = errData.error.message;
+                }
+            } catch (e) {
+                // Response was not valid JSON
+            }
+            throw new Error(errorMsg);
+        }
+
+        const data = await response.json();
+        const responseText = data.candidates[0].content.parts[0].text;
+        
+        chatHistoryContext.push({
+            role: "model",
+            parts: [{ text: responseText }]
+        });
+
+        return responseText;
+    } catch (error) {
+        // Auto-fallback: if the flagship model is busy, instantly try the stable 2.5 version
+        const isBusyError = error.message.includes("high demand") || 
+                            error.message.includes("Resource has been exhausted") || 
+                            error.message.includes("429");
+                            
+        if (model === 'gemini-3.5-flash' && isBusyError) {
+            console.warn("Gemini 3.5 is busy. Falling back to Gemini 2.5-flash...");
+            model = 'gemini-2.5-flash';
+            url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${geminiApiKey}`;
+            
+            try {
+                const responseFallback = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        contents: chatHistoryContext
+                    })
+                });
+
+                if (!responseFallback.ok) {
+                    let errorMsg = `HTTP error! status: ${responseFallback.status}`;
+                    try {
+                        const errData = await responseFallback.json();
+                        if (errData && errData.error && errData.error.message) {
+                            errorMsg = errData.error.message;
+                        }
+                    } catch (e) {}
+                    throw new Error(errorMsg);
+                }
+
+                const dataFallback = await responseFallback.json();
+                const responseTextFallback = dataFallback.candidates[0].content.parts[0].text;
+                
+                chatHistoryContext.push({
+                    role: "model",
+                    parts: [{ text: responseTextFallback }]
+                });
+
+                return responseTextFallback;
+            } catch (fallbackError) {
+                chatHistoryContext.pop(); // Remove user message on total failure
+                throw fallbackError;
+            }
+        }
+        
+        chatHistoryContext.pop(); // Remove user message on total failure
+        throw error;
+    }
 }
 
 // Handle sending a chat message
