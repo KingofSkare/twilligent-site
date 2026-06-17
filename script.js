@@ -615,7 +615,7 @@ geminiKeyBtn.addEventListener('click', () => {
 // Post query to Gemini API
 async function callGeminiAPI(messageText) {
     const model = 'gemini-1.5-flash';
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${geminiApiKey}`;
     
     chatHistoryContext.push({
         role: "user",
