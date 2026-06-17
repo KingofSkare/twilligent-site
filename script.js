@@ -506,16 +506,7 @@ notesTextarea.addEventListener('input', () => {
 });
 
 
-/* ==========================================================================
-   INITIALIZATION
-   ========================================================================== */
-// Apply initial language copy
-updateLanguage(currentLang);
-// Apply initial save indicator opacity control
-saveStatus.style.opacity = '0';
-
-// Initialize Gemini UI
-initGeminiUI();
+// Initialization moved to the end of the file to prevent reference errors before variables are loaded
 
 /* ==========================================================================
    GEMINI CHAT ASSISTANT SYSTEM
@@ -729,3 +720,14 @@ chatInput.addEventListener('keydown', (e) => {
         handleSendMessage();
     }
 });
+
+/* ==========================================================================
+   INITIALIZATION
+   ========================================================================== */
+// Apply initial language copy
+updateLanguage(currentLang);
+// Apply initial save indicator opacity control
+saveStatus.style.opacity = '0';
+
+// Initialize Gemini UI
+initGeminiUI();
