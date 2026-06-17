@@ -615,7 +615,7 @@ geminiKeyBtn.addEventListener('click', () => {
 // Post query to Gemini API
 async function callGeminiAPI(messageText) {
     let model = 'gemini-3.5-flash';
-    let url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${geminiApiKey}`;
+    let url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
     
     // Push message to context if not already present (prevents duplicates on retry)
     if (chatHistoryContext.length === 0 || chatHistoryContext[chatHistoryContext.length - 1].role !== "user") {
@@ -672,7 +672,7 @@ async function callGeminiAPI(messageText) {
         if (model === 'gemini-3.5-flash' && isBusyError) {
             console.warn("Gemini 3.5 is busy. Falling back to Gemini 2.5-flash...");
             model = 'gemini-2.5-flash';
-            url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${geminiApiKey}`;
+            url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
             
             try {
                 const responseFallback = await fetch(url, {
