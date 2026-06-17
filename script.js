@@ -165,7 +165,14 @@ const translations = {
             night: "God natt!"
         },
         saveStatusSaved: "<i class='fa-solid fa-check'></i> Lagret",
-        saveStatusSaving: "<i class='fa-solid fa-circle-notch fa-spin'></i> Lagrer..."
+        saveStatusSaving: "<i class='fa-solid fa-circle-notch fa-spin'></i> Lagrer...",
+        geminiTitle: "Gemini AI-Assistent",
+        geminiSetupDesc: "Vennligst legg inn din private Gemini API-nøkkel. Den lagres trygt lokalt i din nettleser og blir aldri lastet opp til GitHub.",
+        geminiPlaceholder: "Spør Gemini...",
+        geminiWelcome: "Hei! Jeg er din Gemini-assistent. Hva lurer du på i dag?",
+        geminiError: "Det oppstod en feil under forespørselen. Vennligst sjekk API-nøkkelen din.",
+        geminiKeyPrompt: "Vennligst oppgi en gyldig API-nøkkel.",
+        geminiKeySave: "Lagre nøkkel"
     },
     en: {
         langBtn: "Norsk",
@@ -185,7 +192,14 @@ const translations = {
             night: "Good night!"
         },
         saveStatusSaved: "<i class='fa-solid fa-check'></i> Saved",
-        saveStatusSaving: "<i class='fa-solid fa-circle-notch fa-spin'></i> Saving..."
+        saveStatusSaving: "<i class='fa-solid fa-circle-notch fa-spin'></i> Saving...",
+        geminiTitle: "Gemini AI Assistant",
+        geminiSetupDesc: "Please enter your private Gemini API key. It is securely saved locally in your browser and is never uploaded to GitHub.",
+        geminiPlaceholder: "Ask Gemini...",
+        geminiWelcome: "Hello! I am your Gemini assistant. How can I help you today?",
+        geminiError: "An error occurred during the request. Please check your API key.",
+        geminiKeyPrompt: "Please provide a valid API key.",
+        geminiKeySave: "Save Key"
     }
 };
 
@@ -209,6 +223,11 @@ function updateLanguage(lang) {
     
     // Update live text containing clock elements
     updateClock();
+    
+    // Update Gemini AI widget text if initialized
+    if (typeof initGeminiUI === 'function') {
+        initGeminiUI();
+    }
 }
 
 // Language toggle click listener
@@ -494,3 +513,219 @@ notesTextarea.addEventListener('input', () => {
 updateLanguage(currentLang);
 // Apply initial save indicator opacity control
 saveStatus.style.opacity = '0';
+
+// Initialize Gemini UI
+initGeminiUI();
+
+/* ==========================================================================
+   GEMINI CHAT ASSISTANT SYSTEM
+   ========================================================================== */
+const geminiSetupContainer = document.getElementById('gemini-setup-container');
+const geminiChatContainer = document.getElementById('gemini-chat-container');
+const geminiApiKeyInput = document.getElementById('gemini-api-key');
+const saveGeminiKeyBtn = document.getElementById('save-gemini-key');
+const geminiKeyBtn = document.getElementById('gemini-key-btn');
+const chatHistory = document.getElementById('chat-history');
+const chatInput = document.getElementById('chat-input');
+const sendChatBtn = document.getElementById('send-chat-btn');
+
+let geminiApiKey = localStorage.getItem('twilligent_gemini_key') || '';
+let chatHistoryContext = [];
+
+// Escapes HTML tags to prevent XSS injection
+function escapeHTML(text) {
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// Simple parser to format Gemini markdown response text into clean HTML
+function formatResponseText(text) {
+    let escaped = escapeHTML(text);
+
+    // Code blocks ```code```
+    escaped = escaped.replace(/```([\s\S]+?)```/g, '<pre><code>$1</code></pre>');
+    
+    // Inline code `code`
+    escaped = escaped.replace(/`([^`\n]+?)`/g, '<code>$1</code>');
+
+    // Bold **text**
+    escaped = escaped.replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>');
+
+    // Italic *text*
+    escaped = escaped.replace(/\*([\s\S]+?)\*/g, '<em>$1</em>');
+
+    // Bullet points (start of line with * or -)
+    escaped = escaped.replace(/^\s*[\*\-]\s+(.+)$/gm, '• $1');
+
+    // Paragraphs / Line breaks
+    escaped = escaped.replace(/\n/g, '<br>');
+
+    return escaped;
+}
+
+// Update UI state based on if API key exists
+function initGeminiUI() {
+    // Translate setup descriptions and titles based on language
+    if (!translations[currentLang]) return;
+    
+    document.getElementById('gemini-title').innerText = translations[currentLang].geminiTitle;
+    document.getElementById('gemini-setup-desc').innerText = translations[currentLang].geminiSetupDesc;
+    document.getElementById('save-gemini-key').innerText = translations[currentLang].geminiKeySave;
+    chatInput.placeholder = translations[currentLang].geminiPlaceholder;
+
+    if (geminiApiKey) {
+        geminiSetupContainer.style.display = 'none';
+        geminiChatContainer.style.display = 'flex';
+        
+        // Load initial welcome message if chat history is empty
+        if (chatHistoryContext.length === 0) {
+            chatHistory.innerHTML = `
+                <div class="chat-bubble model-bubble">
+                    ${translations[currentLang].geminiWelcome}
+                </div>
+            `;
+        }
+    } else {
+        geminiSetupContainer.style.display = 'flex';
+        geminiChatContainer.style.display = 'none';
+        chatHistoryContext = [];
+        chatHistory.innerHTML = '';
+    }
+}
+
+// Save API Key
+saveGeminiKeyBtn.addEventListener('click', () => {
+    const key = geminiApiKeyInput.value.trim();
+    if (!key) {
+        alert(translations[currentLang].geminiKeyPrompt);
+        return;
+    }
+    
+    localStorage.setItem('twilligent_gemini_key', key);
+    geminiApiKey = key;
+    geminiApiKeyInput.value = '';
+    initGeminiUI();
+});
+
+// Setup key change/removal
+geminiKeyBtn.addEventListener('click', () => {
+    if (confirm(currentLang === 'no' ? "Vil du endre eller fjerne API-nøkkelen din?" : "Do you want to change or remove your API key?")) {
+        localStorage.removeItem('twilligent_gemini_key');
+        geminiApiKey = '';
+        initGeminiUI();
+        geminiApiKeyInput.focus();
+    }
+});
+
+// Post query to Gemini API
+async function callGeminiAPI(messageText) {
+    const model = 'gemini-1.5-flash';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
+    
+    chatHistoryContext.push({
+        role: "user",
+        parts: [{ text: messageText }]
+    });
+
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            contents: chatHistoryContext
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const responseText = data.candidates[0].content.parts[0].text;
+    
+    chatHistoryContext.push({
+        role: "model",
+        parts: [{ text: responseText }]
+    });
+
+    return responseText;
+}
+
+// Handle sending a chat message
+async function handleSendMessage() {
+    const messageText = chatInput.value.trim();
+    if (!messageText) return;
+
+    // 1. Add user bubble to UI
+    const userBubble = document.createElement('div');
+    userBubble.className = "chat-bubble user-bubble";
+    userBubble.textContent = messageText;
+    chatHistory.appendChild(userBubble);
+    
+    // Clear input & scroll
+    chatInput.value = '';
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+
+    // 2. Add loading bubble
+    const loadingBubble = document.createElement('div');
+    loadingBubble.className = "chat-bubble model-bubble loading-bubble";
+    loadingBubble.id = "gemini-loading-bubble";
+    loadingBubble.innerHTML = `
+        <div class="typing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    `;
+    chatHistory.appendChild(loadingBubble);
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+
+    // Disable inputs
+    chatInput.disabled = true;
+    sendChatBtn.disabled = true;
+
+    try {
+        const responseText = await callGeminiAPI(messageText);
+        
+        // Remove loading bubble
+        loadingBubble.remove();
+
+        // 3. Add model bubble
+        const modelBubble = document.createElement('div');
+        modelBubble.className = "chat-bubble model-bubble";
+        modelBubble.innerHTML = formatResponseText(responseText);
+        chatHistory.appendChild(modelBubble);
+        
+    } catch (error) {
+        console.error("Chat Error:", error);
+        loadingBubble.remove();
+
+        // Add error bubble
+        const errorBubble = document.createElement('div');
+        errorBubble.className = "chat-bubble system-bubble";
+        errorBubble.textContent = translations[currentLang].geminiError;
+        chatHistory.appendChild(errorBubble);
+    } finally {
+        // Enable inputs
+        chatInput.disabled = false;
+        sendChatBtn.disabled = false;
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+        chatInput.focus();
+    }
+}
+
+// Send on click
+sendChatBtn.addEventListener('click', handleSendMessage);
+
+// Send on Enter (but Shift+Enter makes a newline)
+chatInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSendMessage();
+    }
+});

@@ -126,6 +126,39 @@
                 </div>
                 <textarea id="notes-textarea" placeholder="Skriv ned dine ideer eller gjøremål her... De lagres automatisk på maskinen din."></textarea>
             </section>
+
+            <!-- Gemini AI Assistant Widget -->
+            <section class="card gemini-card">
+                <div class="card-header">
+                    <h3><i class="fa-solid fa-wand-magic-sparkles header-icon"></i> <span id="gemini-title">Gemini AI-Assistent</span></h3>
+                    <div class="gemini-actions">
+                        <button id="gemini-key-btn" class="btn btn-icon" title="Endre API-nøkkel">
+                            <i class="fa-solid fa-key"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- API Key Setup Screen -->
+                <div class="gemini-setup-container" id="gemini-setup-container">
+                    <p id="gemini-setup-desc">Vennligst legg inn din private Gemini API-nøkkel. Den lagres trygt lokalt i din nettleser og blir aldri lastet opp til GitHub.</p>
+                    <div class="form-group">
+                        <input type="password" id="gemini-api-key" placeholder="AIzaSy...">
+                    </div>
+                    <button id="save-gemini-key" class="btn btn-primary btn-sm">Lagre nøkkel</button>
+                    <p class="key-help-text">Du kan opprette en gratis nøkkel i <a href="https://aistudio.google.com/" target="_blank">Google AI Studio</a>.</p>
+                </div>
+
+                <!-- Chat Interface -->
+                <div class="gemini-chat-container" id="gemini-chat-container" style="display: none;">
+                    <div class="chat-history" id="chat-history">
+                        <!-- Welcome message added dynamically -->
+                    </div>
+                    <div class="chat-input-area">
+                        <textarea id="chat-input" placeholder="Spør Gemini..."></textarea>
+                        <button id="send-chat-btn" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </section>
         </main>
 
         <!-- Footer -->
@@ -134,6 +167,6 @@
         </footer>
     </div>
 
-    <script src="script.js?v=3"></script>
+    <script src="script.js?v=4"></script>
 </body>
 </html>
